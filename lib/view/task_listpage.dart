@@ -2,7 +2,9 @@ import 'package:crudapplication/model/admin_model.dart';
 import 'package:crudapplication/model/server_model.dart';
 import 'package:crudapplication/model/task_model.dart';
 import 'package:crudapplication/utils/app_typography.dart';
+import 'package:crudapplication/view/profile_screen.dart';
 import 'package:crudapplication/viewmodel/task_viewmodel.dart';
+import 'package:crudapplication/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -126,12 +128,16 @@ class _TaskListPageState extends State<TaskListPage> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: AppTypography.outfitRegular),
+            CustomButton(
+              buttonName: 'Cancel',
+              onTap: () => Navigator.pop(context),
+              buttonColor: Colors.grey, // You can choose a suitable color
+              height: 40,
+              width: 100,
             ),
-            TextButton(
-              onPressed: () {
+            CustomButton(
+              buttonName: 'Update',
+              onTap: () {
                 if (nameController.text.isEmpty ||
                     descriptionController.text.isEmpty ||
                     deadlineController.text.isEmpty) {
@@ -150,7 +156,9 @@ class _TaskListPageState extends State<TaskListPage> {
                     )
                     .then((_) => Navigator.pop(context));
               },
-              child: const Text('Update', style: AppTypography.outfitBold),
+              buttonColor: Colors.green,
+              height: 40,
+              width: 100,
             ),
           ],
         );
@@ -164,8 +172,19 @@ class _TaskListPageState extends State<TaskListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task List', style: AppTypography.outfitboldmainHead),
-      ),
+          title:
+              const Text('Task List', style: AppTypography.outfitboldmainHead),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.person),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
+              },
+            ),
+          ]),
       body: taskViewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
           : taskViewModel.tasks.isEmpty
@@ -210,11 +229,13 @@ class _TaskListPageState extends State<TaskListPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.edit),
+                                icon: const Icon(Icons.edit,
+                                    color: Colors.green), // Changed to green
                                 onPressed: () => _showEditTaskDialog(task),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete),
+                                icon: const Icon(Icons.delete,
+                                    color: Colors.red), // Changed to red
                                 onPressed: () {
                                   _showDeleteConfirmationDialog(
                                       context, task.id);
@@ -245,19 +266,25 @@ void _showDeleteConfirmationDialog(BuildContext context, int taskId) {
         content: const Text('Are you sure you want to delete this task?',
             style: AppTypography.outfitRegular),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel', style: AppTypography.outfitRegular),
+          CustomButton(
+            buttonName: 'Cancel',
+            onTap: () => Navigator.pop(dialogContext),
+            buttonColor: Colors.green, // You can choose a suitable color
+            height: 40,
+            width: 100,
           ),
-          TextButton(
-            onPressed: () {
+          CustomButton(
+            buttonName: 'Delete',
+            onTap: () {
               print(taskId);
               Navigator.pop(dialogContext); // Close the dialog
               // Use the `context` of `TaskListPage` instead of the dialog's context
               Provider.of<TaskViewModel>(context, listen: false)
                   .deleteTask(taskId, context);
             },
-            child: const Text('Delete', style: AppTypography.outfitBold),
+            buttonColor: Colors.red,
+            height: 40,
+            width: 100,
           ),
         ],
       );

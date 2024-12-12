@@ -1,4 +1,3 @@
-
 import 'package:crudapplication/utils/app_typography.dart';
 import 'package:crudapplication/utils/responsive.dart';
 import 'package:crudapplication/view/task_listpage.dart';
@@ -36,20 +35,27 @@ class _LoginScreenState extends State<LoginScreen> {
         headers: {'Content-Type': 'application/json'},
       );
 
+      // In the _login() method of LoginScreen
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
 
-        // Store the token in SharedPreferences
+        // Store the token and user details in SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', responseData['token']);
+        await prefs.setString('user_image', responseData['image']);
+        await prefs.setString('user_name', responseData['name']);
+        await prefs.setString('user_position', responseData['position']);
+        await prefs.setInt('user_no_of_task', responseData['no_of_task']);
+        await prefs.setInt('user_percentage', responseData['percentage']);
 
         // Navigate to TaskListPage
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TaskListPage(),
-          ),
-        );
+     Navigator.pushAndRemoveUntil(
+  context,
+  MaterialPageRoute(
+    builder: (context) => TaskListPage(),
+  ),
+  (Route<dynamic> route) => false,
+);
       } else {
         setState(() {
           _errorMessage = 'Invalid credentials';
