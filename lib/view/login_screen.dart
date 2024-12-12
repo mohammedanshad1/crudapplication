@@ -1,7 +1,4 @@
-import 'dart:developer';
 
-import 'package:crudapplication/model/admin_model.dart';
-import 'package:crudapplication/model/server_model.dart';
 import 'package:crudapplication/utils/app_typography.dart';
 import 'package:crudapplication/utils/responsive.dart';
 import 'package:crudapplication/view/task_listpage.dart';
@@ -23,58 +20,50 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String _errorMessage = '';
+  bool _obscurePassword = false; // To toggle password visibility
 
- Future<void> _login() async {
-  if (_formKey.currentState!.validate()) {
-    final email = _emailController.text;
-    final password = _passwordController.text;
+  Future<void> _login() async {
+    if (_formKey.currentState!.validate()) {
+      final email = _emailController.text;
+      final password = _passwordController.text;
 
-    final response = await http.post(
-      Uri.parse('https://erpbeta.cloudocz.com/api/auth/login'),
-      body: json.encode({
-        'email': email,
-        'password': password,
-      }),
-      headers: {'Content-Type': 'application/json'},
-    );
+      final response = await http.post(
+        Uri.parse('https://erpbeta.cloudocz.com/api/auth/login'),
+        body: json.encode({
+          'email': email,
+          'password': password,
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
 
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
 
-      // Store the token in SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', responseData['token']);
+        // Store the token in SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('auth_token', responseData['token']);
 
-      if (email == 'admin@example.com') {
-        final adminModel = AdminModel.fromJson(responseData);
+        // Navigate to TaskListPage
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TaskListPage(adminModel: adminModel),
+            builder: (context) => TaskListPage(),
           ),
         );
       } else {
-        final serverModel = ServerModel.fromJson(responseData);
-        Navigator.push(
+        setState(() {
+          _errorMessage = 'Invalid credentials';
+        });
+        CustomSnackBar.show(
           context,
-          MaterialPageRoute(
-            builder: (context) => TaskListPage(serverModel: serverModel),
-          ),
+          snackBarType: SnackBarType.fail,
+          label: 'Login Failed: Invalid credentials',
+          bgColor: Colors.red,
         );
       }
-    } else {
-      setState(() {
-        _errorMessage = 'Invalid credentials';
-      });
-      CustomSnackBar.show(
-        context,
-        snackBarType: SnackBarType.fail,
-        label: 'Login Failed: Invalid credentials',
-        bgColor: Colors.red,
-      );
     }
   }
-}
+
   @override
   Widget build(BuildContext context) {
     final responsive = context.responsive;
@@ -120,12 +109,26 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: responsive.hp(2)),
                 TextFormField(
                   controller: _passwordController,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: AppTypography.outfitboldsubHead,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword =
+                              !_obscurePassword; // Toggle visibility
+                        });
+                      },
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Colors.grey,
+                      ),
                     ),
                   ),
                   validator: (value) {
