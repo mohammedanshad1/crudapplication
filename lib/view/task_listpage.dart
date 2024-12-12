@@ -3,6 +3,7 @@ import 'package:crudapplication/model/server_model.dart';
 import 'package:crudapplication/model/task_model.dart';
 import 'package:crudapplication/utils/app_typography.dart';
 import 'package:crudapplication/view/profile_screen.dart';
+import 'package:crudapplication/view/task_view.dart';
 import 'package:crudapplication/viewmodel/task_viewmodel.dart';
 import 'package:crudapplication/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -204,51 +205,61 @@ class _TaskListPageState extends State<TaskListPage> {
                     itemCount: taskViewModel.tasks.length,
                     itemBuilder: (context, index) {
                       final task = taskViewModel.tasks[index];
-                      return Card(
-                        elevation: 4,
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 16),
-                        child: ListTile(
-                          title: Text(task.name,
-                              style: AppTypography.outfitMedium),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text(
-                                task.description.toString(),
-                                style: AppTypography.outfitRegular,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Percentage: ${task.percentage}%',
-                                style: AppTypography.outfitLight
-                                    .copyWith(color: Colors.grey),
-                              ),
-                              Text(
-                                'Status: ${task.status}',
-                                style: AppTypography.outfitLight
-                                    .copyWith(color: Colors.blue),
-                              ),
-                            ],
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit,
-                                    color: Colors.green), // Changed to green
-                                onPressed: () => _showEditTaskDialog(task),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete,
-                                    color: Colors.red), // Changed to red
-                                onPressed: () {
-                                  _showDeleteConfirmationDialog(
-                                      context, task.id);
-                                },
-                              ),
-                            ],
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TaskViewPage(
+                                        id: task.id,
+                                      )));
+                        },
+                        child: Card(
+                          elevation: 4,
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 16),
+                          child: ListTile(
+                            title: Text(task.name,
+                                style: AppTypography.outfitMedium),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Text(
+                                  task.description.toString(),
+                                  style: AppTypography.outfitRegular,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Percentage: ${task.percentage}%',
+                                  style: AppTypography.outfitLight
+                                      .copyWith(color: Colors.grey),
+                                ),
+                                Text(
+                                  'Status: ${task.status}',
+                                  style: AppTypography.outfitLight
+                                      .copyWith(color: Colors.blue),
+                                ),
+                              ],
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit,
+                                      color: Colors.green), // Changed to green
+                                  onPressed: () => _showEditTaskDialog(task),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.red), // Changed to red
+                                  onPressed: () {
+                                    _showDeleteConfirmationDialog(
+                                        context, task.id);
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
