@@ -37,12 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
-    await prefs.remove('user_image');
-    await prefs.remove('user_name');
-    await prefs.remove('user_position');
-    await prefs.remove('user_no_of_task');
-    await prefs.remove('user_percentage');
+    await prefs.clear(); // Clear all data stored in SharedPreferences
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -65,9 +60,8 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               CircleAvatar(
                 radius: 80,
-                backgroundImage: _userImage.isNotEmpty
-                    ? NetworkImage(_userImage)
-                    : null,
+                backgroundImage:
+                    _userImage.isNotEmpty ? NetworkImage(_userImage) : null,
                 child: _userImage.isEmpty
                     ? const Icon(Icons.person, size: 80)
                     : null,

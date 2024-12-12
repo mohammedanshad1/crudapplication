@@ -7,6 +7,7 @@ import 'package:crudapplication/viewmodel/task_viewmodel.dart';
 import 'package:crudapplication/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 class TaskListPage extends StatefulWidget {
   final AdminModel? adminModel;
@@ -66,12 +67,16 @@ class _TaskListPageState extends State<TaskListPage> {
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: AppTypography.outfitRegular),
+            CustomButton(
+              buttonName: 'Cancel',
+              onTap: () => Navigator.pop(context),
+              buttonColor: Colors.red, // You can choose a suitable color
+              height: 40,
+              width: 100,
             ),
-            TextButton(
-              onPressed: () {
+            CustomButton(
+              buttonName: 'Add',
+              onTap: () {
                 Provider.of<TaskViewModel>(context, listen: false)
                     .addTask(
                       nameController.text,
@@ -81,7 +86,9 @@ class _TaskListPageState extends State<TaskListPage> {
                     )
                     .then((_) => Navigator.pop(context));
               },
-              child: const Text('Add', style: AppTypography.outfitBold),
+              buttonColor: Colors.green, // You can choose a suitable color
+              height: 40,
+              width: 100,
             ),
           ],
         );
@@ -131,7 +138,7 @@ class _TaskListPageState extends State<TaskListPage> {
             CustomButton(
               buttonName: 'Cancel',
               onTap: () => Navigator.pop(context),
-              buttonColor: Colors.grey, // You can choose a suitable color
+              buttonColor: Colors.red, // You can choose a suitable color
               height: 40,
               width: 100,
             ),
@@ -186,7 +193,7 @@ class _TaskListPageState extends State<TaskListPage> {
             ),
           ]),
       body: taskViewModel.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? _buildSkeletonLoader()
           : taskViewModel.tasks.isEmpty
               ? const Center(
                   child: Text('No tasks found',
@@ -254,6 +261,64 @@ class _TaskListPageState extends State<TaskListPage> {
       ),
     );
   }
+
+  Widget _buildSkeletonLoader() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: ListView.builder(
+        itemCount: 10, // Number of skeleton items to show
+        itemBuilder: (context, index) {
+          return Card(
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: ListTile(
+              title: Container(
+                height: 16,
+                width: double.infinity,
+                color: Colors.white,
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Container(
+                    height: 12,
+                    width: double.infinity,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 12,
+                    width: 100,
+                    color: Colors.white,
+                  ),
+                  Container(
+                    height: 12,
+                    width: 100,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.green),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 void _showDeleteConfirmationDialog(BuildContext context, int taskId) {
@@ -269,20 +334,19 @@ void _showDeleteConfirmationDialog(BuildContext context, int taskId) {
           CustomButton(
             buttonName: 'Cancel',
             onTap: () => Navigator.pop(dialogContext),
-            buttonColor: Colors.green, // You can choose a suitable color
+            buttonColor: Colors.red, // You can choose a suitable color
             height: 40,
             width: 100,
           ),
           CustomButton(
             buttonName: 'Delete',
             onTap: () {
-              print(taskId);
               Navigator.pop(dialogContext); // Close the dialog
               // Use the `context` of `TaskListPage` instead of the dialog's context
               Provider.of<TaskViewModel>(context, listen: false)
                   .deleteTask(taskId, context);
             },
-            buttonColor: Colors.red,
+            buttonColor: Colors.green,
             height: 40,
             width: 100,
           ),

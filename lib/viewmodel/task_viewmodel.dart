@@ -159,62 +159,62 @@ class TaskViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteTask(int id, BuildContext context) async {
+Future<void> deleteTask(int id, BuildContext context) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+
+    if (token == null) {
+      _errorMessage = 'You are not logged in. Please log in again.';
+      notifyListeners();
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('https://erpbeta.cloudocz.com/api/app/tasks/destroy/$id'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    // Handle empty or invalid JSON response
+    dynamic responseData;
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('auth_token');
-
-      if (token == null) {
-        _errorMessage = 'You are not logged in. Please log in again.';
-        notifyListeners();
-        return;
-      }
-
-      final response = await http.post(
-        Uri.parse('https://erpbeta.cloudocz.com/api/app/tasks/destroy/$id'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      // Handle empty or invalid JSON response
-      dynamic responseData;
-      try {
-        responseData =
-            response.body.isNotEmpty ? json.decode(response.body) : null;
-      } catch (e) {
-        responseData = null;
-      }
-
-      if (response.statusCode == 200 &&
-          (responseData == null || responseData['error'] == false)) {
-        _errorMessage = 'Task deleted successfully';
-        await fetchTasks(); // Refresh the task list
-
-        // Show custom snackbar for success
-        _showCustomSnackBar(context, 'Task deleted successfully',
-            SnackBarType.success, Colors.green);
-      } else {
-        _errorMessage = responseData != null
-            ? 'Failed to delete task: ${responseData['message']}'
-            : 'Failed to delete task: Invalid response';
-
-        // Show custom snackbar for error
-        _showCustomSnackBar(
-            context, 'Failed to delete task', SnackBarType.fail, Colors.red);
-      }
+      responseData = response.body.isNotEmpty ? json.decode(response.body) : null;
     } catch (e) {
-      // Handle any unexpected errors
-      _errorMessage = 'An unexpected error occurred: $e';
+      responseData = null;
+    }
+
+    if (response.statusCode == 200 &&
+        (responseData == null || responseData['error'] == false)) {
+      _errorMessage = 'Task deleted successfully';
+      await fetchTasks(); // Refresh the task list
+
+      // Show custom snackbar for success
+      _showCustomSnackBar(context, 'Task deleted successfully',
+          SnackBarType.success, Colors.green);
+    } else {
+      _errorMessage = responseData != null
+          ? 'Failed to delete task: ${responseData['message']}'
+          : 'Failed to delete task: Invalid response';
 
       // Show custom snackbar for error
       _showCustomSnackBar(
           context, 'Failed to delete task', SnackBarType.fail, Colors.red);
-    } finally {
-      notifyListeners();
     }
+  } catch (e) {
+    // Handle any unexpected errors
+    _errorMessage = 'An unexpected error occurred: $e';
+
+    // Show custom snackbar for error
+    _showCustomSnackBar(
+        context, 'Failed to delete task', SnackBarType.fail, Colors.red);
+  } finally {
+    notifyListeners();
   }
+}
+
 
   void _showCustomSnackBar(BuildContext context, String message,
       SnackBarType snackBarType, Color bgColor) {
